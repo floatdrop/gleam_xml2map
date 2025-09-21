@@ -1,5 +1,5 @@
 name = "xml2map"
-version = "1.0.0"
+version = "0.0.1"
 
 description = "Converts XML to json-like map for decode compatibility"
 licences = ["Apache-2.0"]
