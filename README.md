@@ -42,6 +42,7 @@ pub fn child_decoder() -> decode.Decoder(Child) {
 
 pub fn main() -> Nil {
   use node <- try(xml2map.parse("<node><child name=\"A\">text1</child><child name=\"B\">text2</child></node>", using: node_decoder()))
+  let _ = echo node
 }
 ```
 
