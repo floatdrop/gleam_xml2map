@@ -1,4 +1,5 @@
 import gleam/dynamic/decode
+import gleam/list
 import gleeunit
 import gleeunit/should
 import xml2map
@@ -31,7 +32,7 @@ pub fn channel_decoder() -> decode.Decoder(Channel) {
   use items <- decode.field(
     "item",
     decode.one_of(decode.list(item_decoder()), or: [
-      item_decoder() |> decode.map(fn(item: Item) -> List(Item) { [item] }),
+      item_decoder() |> decode.map(list.wrap),
     ]),
   )
 

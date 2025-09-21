@@ -6,11 +6,42 @@
 ```sh
 gleam add xml2map@1
 ```
+
 ```gleam
+import gleam/dynamic/decode
+import gleam/list
+import gleam/result.{try}
 import xml2map
 
+pub type Node {
+  Node(children: List(Child))
+}
+
+pub fn node_decoder() -> decode.Decoder(Node) {
+  // Decode one child or multiple child to List
+  use children <- decode.field(
+    "child",
+    decode.one_of(decode.list(child_decoder()), or: [
+      child_decoder() |> decode.map(list.wrap),
+    ]),
+  )
+
+  decode.success(Node(children:))
+}
+
+pub type Child {
+  Child(name: String, text: String)
+}
+
+pub fn child_decoder() -> decode.Decoder(Child) {
+  use name <- decode.field("@name", decode.string)
+  use text <- decode.field("#text", decode.string)
+
+  decode.success(Child(name:, text:))
+}
+
 pub fn main() -> Nil {
-  // TODO: An example of the project in use
+  use node <- try(xml2map.parse("<node><child name=\"A\">text1</child><child name=\"B\">text2</child></node>", using: node_decoder()))
 }
 ```
 
