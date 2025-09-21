@@ -1,10 +1,9 @@
--module(xml_ffi).
+-module(xml2map_ffi).
 -export([decode/1, decode_string/1]).
 
 -include_lib("xmerl/include/xmerl.hrl").
 
 %% Public API
-% -spec decode(binary() | string() | iolist()) -> map().
 decode(Bin) when is_binary(Bin) ->
     decode_string(binary_to_list(Bin));
 decode(Bin) when is_list(Bin) ->
@@ -12,13 +11,11 @@ decode(Bin) when is_list(Bin) ->
 decode(Io) ->
     decode_string(Io).
 
-% -spec decode_string(string()) -> map().
 decode_string(String) ->
     %% xmerl_scan:string expects a charlist (string())
     {Xml, _} = xmerl_scan:string(String),
     RootList = listify(Xml),
     Map = maps:from_list([{ name_to_bin(E#xmlElement.name), element_to_map(E) } || E <- RootList]),
-    erlang:display(Map),
     {ok, Map}.
 
 %%%% helpers %%%%
@@ -26,7 +23,6 @@ listify(E) when is_list(E) -> E;
 listify(E) -> [E].
 
 %% Convert an xmerl xmlElement -> map of its attributes, text and children
--spec element_to_map(#xmlElement{}) -> map().
 element_to_map(E = #xmlElement{}) ->
     %% attributes -> map with keys prefixed "@"
     Attrs = lists:foldl(fun(A, Acc) ->
@@ -51,7 +47,6 @@ element_to_map(E = #xmlElement{}) ->
     end.
 
 %% Process content list: returns {ChildrenMap, TextsAccRev}
--spec process_content(list(), map(), list()) -> {map(), list()}.
 process_content([], AccChildren, Texts) ->
     {AccChildren, Texts};
 process_content([H|T], AccChildren, Texts) ->
@@ -74,7 +69,6 @@ process_content([H|T], AccChildren, Texts) ->
     end.
 
 %% Add child under key; if multiple children with same name, produce list in order
--spec add_child(map(), binary(), any()) -> map().
 add_child(Acc, Key, Value) ->
     case maps:get(Key, Acc, undefined) of
         undefined ->
@@ -120,7 +114,6 @@ value_to_bin(Other) ->
     list_to_binary(io_lib:format("~p", [Other])).
 
 %% join multiple text nodes with a single space (trim each first)
--spec join_texts([binary()]) -> binary().
 join_texts(List) ->
     Strs = [ binary_to_list(trim_bin(B)) || B <- List ],
     NonEmpty = [ S || S <- Strs, S /= [] ],
@@ -130,13 +123,11 @@ join_texts(List) ->
     end.
 
 %% trim binary -> binary (using string:trim which returns a charlist)
--spec trim_bin(binary()) -> binary().
 trim_bin(Bin) when is_binary(Bin) ->
     Str = binary_to_list(Bin),
     Trimmed = string:trim(Str),
     list_to_binary(Trimmed).
 
 %% check blank
--spec is_blank(binary()) -> boolean().
 is_blank(Bin) when is_binary(Bin) ->
     trim_bin(Bin) == <<>>.

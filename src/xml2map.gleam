@@ -30,10 +30,9 @@ pub fn parse_bits(
   using decoder: decode.Decoder(t),
 ) -> Result(t, DecodeError) {
   use dynamic_value <- result.try(decode_to_dynamic(json))
-  let _ = echo dynamic_value
   decode.run(dynamic_value, decoder)
   |> result.map_error(UnableToDecode)
 }
 
-@external(erlang, "xml_ffi", "decode")
+@external(erlang, "xml2map_ffi", "decode")
 fn decode_to_dynamic(json: BitArray) -> Result(Dynamic, DecodeError)
